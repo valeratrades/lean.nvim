@@ -72,6 +72,7 @@
 ---@field horizontal_position? "top"|"bottom" where to position horizontal infoviews (default "bottom")
 ---@field separate_tab? boolean open infoviews in a separate tab (default false)
 ---@field indicators? "always"|"auto"|"never" when to show pin location indicators (default "auto")
+---@field keep_stale_goal? boolean keep showing the last goal state for the same file while Lean is processing (default true)
 ---@field show_processing? boolean show a processing message while Lean is busy (default true)
 ---@field show_no_info_message? boolean show a message when there is no info to show (default false)
 ---@field mappings? { [string]: ElementEvent } deprecated, will be removed in v2026.9.1; use `<Plug>(LeanInfoview*)` mappings instead
@@ -88,6 +89,7 @@
 ---@field horizontal_position "top"|"bottom" where to position horizontal infoviews
 ---@field separate_tab boolean open infoviews in a separate tab
 ---@field indicators "always"|"auto"|"never" when to show pin location indicators
+---@field keep_stale_goal boolean keep showing the last goal state for the same file while Lean is processing
 ---@field show_processing boolean show a processing message while Lean is busy
 ---@field show_no_info_message boolean show a message when there is no info to show
 ---@field mappings { [string]: ElementEvent } deprecated, will be removed in v2026.9.1
@@ -233,6 +235,7 @@ local DEFAULTS = {
     horizontal_position = 'bottom',
     separate_tab = false,
     indicators = 'auto',
+    keep_stale_goal = true,
     show_processing = true,
     show_no_info_message = false,
     update_cooldown = 50,

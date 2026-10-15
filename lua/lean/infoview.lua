@@ -179,6 +179,8 @@ vim.api.nvim_create_autocmd('LspAttach', {
 ---@field buffer Buffer the buffer for this pin's output
 ---@field window Window the window showing this pin's buffer
 ---@field private __data_element Element
+---@field private __stale_uri? string the file `__data_element` may be kept for as a stale goal
+---@field private __stale? boolean whether `__data_element` is being kept while Lean processes
 ---@field private __element Element
 ---@field private __extmark number
 ---@field private __extmark_buffer Buffer
@@ -900,6 +902,8 @@ function Infoview:__update_winhighlight()
 
   if self.pin.paused then
     self.window.o.winhighlight = 'NormalNC:leanInfoPaused'
+  elseif self.pin.__stale then
+    self.window.o.winhighlight = 'NormalNC:leanInfoProcessing'
   else
     local params = self.pin.__position_params
     if params then
@@ -1789,8 +1793,15 @@ function Pin:update()
       return
     end
 
-    local sw = self.__instrumentation:stopwatch()
     local uri = params.textDocument.uri
+    local processing = progress.at(params) == progress.Kind.processing
+    self.__stale = processing and options.keep_stale_goal and self.__stale_uri == uri
+    if self.__stale then
+      iv:__update_winhighlight()
+      return
+    end
+
+    local sw = self.__instrumentation:stopwatch()
 
     sw:open 'setup'
     iv:__update_winhighlight()
@@ -1824,6 +1835,12 @@ function Pin:update()
     -- so an overlapping update that already committed is honored.
     Element.transfer_state(self.__data_element, new_data_element)
     self.__data_element = new_data_element
+    self.__stale_uri = not processing
+        and new_data_element ~= components.EMPTY
+        and new_data_element ~= components.NO_INFO
+        and new_data_element ~= components.LSP_HAS_DIED
+        and uri
+      or nil
     self.__element:set_children { self.__data_element }
     iv.__last_trace_query = nil
     sw:close()

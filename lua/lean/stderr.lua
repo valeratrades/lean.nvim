@@ -34,6 +34,7 @@ local function open_window(stderr_buffer)
     stderr_window = Window:current()
   end
   stderr_window:set_height(require 'lean.config'().stderr.height)
+  stderr_window.o.winhighlight = 'NormalNC:Normal'
   stderr_buffer.o.filetype = 'leanstderr'
   initial_window:make_current()
   return stderr_window
