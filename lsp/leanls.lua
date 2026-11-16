@@ -225,11 +225,25 @@ return {
     else
       local_cmd = { 'lean', '--server', config.root_dir }
     end
-    return vim.lsp.rpc.start(local_cmd, dispatchers, {
+    local ok, client_or_err = pcall(vim.lsp.rpc.start, local_cmd, dispatchers, {
       cwd = cmd_cwd,
       env = config.cmd_env,
       detached = config.detached,
     })
+    lsp.spawn_error = not ok and client_or_err:gsub('^.-:%d+: ', '') or nil
+    if not ok then
+      -- Neovim only warns about this once, while the infoview would otherwise
+      -- keep claiming the file is being processed.
+      vim.schedule(function()
+        for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+          if vim.bo[bufnr].filetype == 'lean' then
+            require('lean.infoview').__update_pin_by_uri(vim.uri_from_bufnr(bufnr))
+          end
+        end
+      end)
+      error(client_or_err, 0)
+    end
+    return client_or_err
   end,
 
   root_dir = function(bufnr, on_dir)

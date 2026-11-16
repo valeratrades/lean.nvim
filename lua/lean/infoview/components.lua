@@ -25,9 +25,22 @@ local components = {
     hlgroups = { 'DiagnosticError' },
   },
   NO_INFO = Element:new { text = 'No info.', name = 'no-info' },
+  LSP_NOT_ENABLED = Element:new {
+    text = '⚠ The Lean language server (leanls) is not enabled.',
+    hlgroups = { 'DiagnosticError' },
+  },
   PROCESSING = Element:new { text = 'Processing file...', name = 'processing' },
   EMPTY = Element.EMPTY,
 }
+
+---@param err string why the Lean server could not be spawned
+---@return Element
+function components.lsp_failed_to_start(err)
+  return Element:new {
+    text = '⚠ The Lean language server failed to start: ' .. err,
+    hlgroups = { 'DiagnosticError' },
+  }
+end
 
 ---Diagnostic information for the current line from the Lean server.
 ---@param line number

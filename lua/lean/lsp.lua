@@ -17,6 +17,9 @@ local lsp = {
   silent_ns = vim.api.nvim_create_namespace 'lean.diagnostic.silent',
   ---A namespace for Lean's unsolved goal markers.and goals accomplished ranges
   goals_ns = vim.api.nvim_create_namespace 'lean.goal.markers',
+  ---Why the most recent attempt to spawn the Lean server failed, if it did.
+  ---@type string?
+  spawn_error = nil,
 }
 
 ---@class LeanClientCapabilities : lsp.ClientCapabilities
