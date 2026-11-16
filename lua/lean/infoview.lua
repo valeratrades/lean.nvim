@@ -18,6 +18,7 @@ local Locations = require 'lean.infoview.locations'
 local components = require 'lean.infoview.components'
 local interactive_goal = require 'lean.widget.interactive_goal'
 local log = require 'lean.log'
+local lsp = require 'lean.lsp'
 local progress = require 'lean.progress'
 local rpc = require 'lean.rpc'
 
@@ -836,6 +837,15 @@ function Infoview:render_contents(params, sw, previous)
   local bufnr = vim.uri_to_bufnr(params.textDocument.uri)
   if vim.b[bufnr].lean_lsp_died then
     return components.LSP_HAS_DIED, false
+  end
+  -- Until a server reports progress, Lean looks like it's processing, which
+  -- is a lie if no server will ever arrive.
+  if not lsp.client_for(bufnr) then
+    if not vim.lsp.is_enabled 'leanls' then
+      return components.LSP_NOT_ENABLED, false
+    elseif lsp.spawn_error then
+      return components.lsp_failed_to_start(lsp.spawn_error), false
+    end
   end
   local element = contents_for_processing(params, previous)
   if element then
